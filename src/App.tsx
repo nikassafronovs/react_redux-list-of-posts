@@ -20,6 +20,8 @@ import {
   setPostsLoading,
 } from './features/posts/postsSlice';
 import { setSelectedPost } from './features/selectedPost/selectedPostSlice';
+import { getUsers } from './api/users';
+import { setUsers } from './features/users/usersSlice';
 
 export const App: React.FC = () => {
   const posts = useSelector((state: RootState) => state.posts);
@@ -27,24 +29,26 @@ export const App: React.FC = () => {
   const selectedPost = useSelector((state: RootState) => state.selectedPost);
   const dispatch = useAppDispatch();
 
-  function loadUserPosts(userId: number) {
-    dispatch(setPostsLoading());
-
-    getUserPosts(userId)
-      .then(userPosts => dispatch(setPosts(userPosts)))
-      .catch(() => dispatch(setPostsError()));
-  }
+  useEffect(() => {
+    getUsers().then(users => {
+      dispatch(setUsers(users));
+    });
+  }, [dispatch]);
 
   useEffect(() => {
-    // we clear the post when an author is changed
-    // not to confuse the user
     dispatch(setSelectedPost(null));
 
-    if (author) {
-      loadUserPosts(author.id);
-    } else {
+    if (!author) {
       dispatch(setPosts([]));
+
+      return;
     }
+
+    dispatch(setPostsLoading());
+
+    getUserPosts(author.id)
+      .then(userPosts => dispatch(setPosts(userPosts)))
+      .catch(() => dispatch(setPostsError()));
   }, [author, dispatch]);
 
   const { items, loaded, hasError } = posts;
