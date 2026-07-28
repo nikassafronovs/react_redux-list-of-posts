@@ -45,7 +45,7 @@ export const App: React.FC = () => {
     } else {
       dispatch(setPosts([]));
     }
-  }, [author]);
+  }, [author, dispatch]);
 
   const { items, loaded, hasError } = posts;
 
